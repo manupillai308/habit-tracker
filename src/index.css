@@ -1,0 +1,74 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css";
+
+
+.debug {
+  border: 1px red solid;
+}
+
+.shadow-lg {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-md {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.has-border-sm {
+  border: black 1px solid;
+}
+
+.tile-container {
+  width: 100%; /* Makes it scale */
+  aspect-ratio: 1 / 1; /* Ensures it's always a square */
+  max-width: 10rem;
+}
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.scroll {
+  scrollbar-width: none; /* Hides scrollbar */
+  -ms-overflow-style: none; /* Hides scrollbar for IE/Edge */
+}
+
+
+.tile-container:hover {
+  background-color: #ddd;
+  border-color: #bbb;
+}
+.columns {
+  margin-bottom: 0 !important;
+}
+
+/* html {
+  font-size: 80%;
+} */
+
+:root {
+  --bulma-family-primary: "Mali", "Open Sans" !important;
+  --bulma-primary-h: 294deg;
+  --bulma-primary-s: 34%;
+  --bulma-primary-l: 77%;
+  --bulma-info-h: 58deg;
+  --bulma-info-s: 30%;
+  --bulma-info-l: 77%;
+  --bulma-success-h: 121deg;
+  --bulma-success-s: 28%;
+  --bulma-success-l: 61%;
+  --bulma-danger-h: 0deg;
+  --bulma-danger-s: 99%;
+  --bulma-danger-l: 64%;
+}
+body {
+  /* background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url("assets/bg.webp"); */
+  background-image: url("assets/bg.webp");
+  background-size: cover; /* Ensures it covers the full viewport */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Prevents tiling */
+  min-height: 100vh; /* Ensures the background fills the full viewport height */
+}
