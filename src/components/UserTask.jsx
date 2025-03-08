@@ -43,10 +43,10 @@ function UserTask ({userid, close, selectedDate}){
     const setCompleted = ({id: task_id, pts: task_pts}) => {
         const index = completedToday.indexOf(task_id);
         if(index !== -1){
-            setUserData({...userData, completed: {...userData.completed, [datekey]: completedToday.filter(id => id !== task_id)}, pts: (userData.pts)-(task_pts)});
+            setUserData({...userData, completed: {...userData.completed, [datekey]: completedToday.filter(id => id !== task_id)}, pts: Number(userData.pts)-Number(task_pts)});
         }
         else{
-            setUserData({...userData, completed: {...userData.completed, [datekey]: completedToday.concat(task_id)}, pts: (userData.pts)+(task_pts)});
+            setUserData({...userData, completed: {...userData.completed, [datekey]: completedToday.concat(task_id)}, pts: Number(userData.pts)+Number(task_pts)});
         }
     };
 

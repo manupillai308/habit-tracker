@@ -1,6 +1,10 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { openDB } from 'idb';
 
 const PlannerContext = createContext();
+
+const DB_NAME = "habitTrackerDB";
+const DB_VERSION = 1;
 
 function getRandomAvatar(length) {
     const seed = [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
@@ -59,66 +63,40 @@ const isSameMonthDay = (createdAtDate, targetDate) => {
 };
 
 function Provider({ children }){
-    const [db, setDB] = useState({
-        "1":{
-            "id": "1", 
-            "participants": ["user1", "user2"],
-            "title": "Make Bed",
-            "desc": "get up and make bed",
-            "dueDate": "2025-04-05T00:00:00.000Z",
-            "priority": "high",
-            "status": "in-progress",
-            "labels": ["work", "urgent"],
-            "createdAt": "2025-02-24T08:00:00.000Z",
-            "updatedAt": "2025-02-24T10:30:00.000Z",
-            "repeat": {
-                "frequency": "daily",
-                "exceptions": {
-                  "2025-03-02": { "title": ":-P", "desc": "This is an edited task!" }
-                }
-            },
-            "deleted": false,
-            "pts": 10,
-        },
-        "2":{
-            "id": "2", 
-            "participants": ["user1"],
-            "title": "Drink Water",
-            "desc": "drink atleast 2 litres of water",
-            "dueDate": "2025-03-15T00:00:00.000Z",
-            "priority": "high",
-            "status": "in-progress",
-            "labels": ["work", "urgent"],
-            "createdAt": "2025-02-24T08:00:00.000Z",
-            "updatedAt": "2025-02-24T10:30:00.000Z",
-            "repeat": {
-                "frequency": "weekly",
-                "exceptions": {}
-            },
-            "deleted": false,
-            "pts": 5,
-        }
-    });
-    const [userDB, setUserDB] = useState([
-        {
-            "id": "user1",
-            "name": "Sambu",
-            "createdAt": "2025-02-24T08:00:00.000Z",
-            "updatedAt": "2025-02-24T10:30:00.000Z",
-            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=user1",
-            "pts": 210,
-            "completed": {}
-        },
-        {
-            "id": "user2",
-            "name": "Manu",
-            "createdAt": "2025-02-24T08:00:00.000Z",
-            "updatedAt": "2025-02-24T10:30:00.000Z",
-            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=user2",
-            "pts": 130,
-            "completed": {}
-        },
-    ]);
+    const [db, setDB] = useState({});
+    const [userDB, setUserDB] = useState([]);
+
+    useEffect(() => {
+        const initDB = async () => {
+            const database = await openDB(DB_NAME, DB_VERSION, {
+                upgrade(db) {
+                    if (!db.objectStoreNames.contains("tasks")){
+                        db.createObjectStore("tasks", {keyPath: "id", autoIncrement: true});
+                    }
+                    if (!db.objectStoreNames.contains("users")){
+                        db.createObjectStore("users", {keyPath: "id", autoIncrement: true});
+                    }
+                },
+            });
+
+            await loadData(database);
+        };
+        initDB();
+    }, []);
+
+    const loadData = async (database) => {
+        const tx = database.transaction(["tasks", "users"], "readonly");
+        const taskStore = tx.objectStore("tasks");
+        const userStore = tx.objectStore("users");
+
+        const allTasks = await taskStore.getAll();
+        const allUsers = await userStore.getAll();
+
+        setDB(allTasks.reduce((acc, task) => ({...acc, [task.id]: task}), {}));
+        setUserDB(allUsers);
+        
+        await tx.done;
+    };
 
     const getUserById = (id) => {
         return userDB.find((user) => user.id == id);
@@ -172,30 +150,57 @@ function Provider({ children }){
         return filteredTask;
     };
 
-    const addTask = ({task}) => {
-        const id = `${db.length+1}`;
-        db[id] = {...task, id};
-        setDB(db);
+    const addTask = async ({task}) => {
+        const database = await openDB(DB_NAME, DB_VERSION);
+        const tx = database.transaction("tasks", "readwrite");
+        const store = tx.objectStore("tasks");
+        delete task.id;
+
+        const id = await store.put(task);
+        task.id = id; 
+
+        setDB((prev) => ({ ...prev, [id]: task }));
     };
     
-    const addUser = ({user}) => {
-        const id = `${userDB.length+1}`;
-        // user[id] = {...user, id};
-        setUserDB(userDB.concat({...user, id}));
-    };
-    const updateUser = ({user}) => {
-        setUserDB(userDB.map((_user) => {
-            return user.id === _user.id ? user : _user;
-        }));
+    const addUser = async ({user}) => {
+        const database = await openDB(DB_NAME, DB_VERSION);
+        const tx = database.transaction("users", "readwrite");
+        const store = tx.objectStore("users");
+
+        delete user.id;
+        const id = await store.put(user);
+        user.id = id;
+
+        setUserDB((prev) => [...prev, user]);
     };
 
-    const deleteUser = ({user}) => {
-        setUserDB(userDB.filter((_user) =>
-        _user.id !== user.id));
+    const updateUser = async ({user}) => {
+        const database = await openDB(DB_NAME, DB_VERSION);
+        const tx = database.transaction("users", "readwrite");
+        const store = tx.objectStore("users");
+
+        await store.put(user);
+        await tx.done;
+
+        setUserDB((prev) => prev.map((u) => (u.id === user.id ? user : u)));
+    };
+
+    const deleteUser = async ({user}) => {
+        const database = await openDB(DB_NAME, DB_VERSION);
+        const tx = database.transaction("users", "readwrite");
+        const store = tx.objectStore("users");
+
+        await store.delete(user.id);
+        await tx.done;
+
+        setUserDB((prev) => prev.filter((u) => u.id !== user.id));
     };
     
-    const saveTask = ({tasks, deletes, targetDate}) => {
+    const saveTask = async ({tasks, deletes, targetDate}) => {
         const targetDateStr = targetDate.toISOString().split("T")[0];
+        const database = await openDB(DB_NAME, DB_VERSION);
+        const tx = database.transaction("tasks", "readwrite");
+        const store = tx.objectStore("tasks");
         // {id: payload.id, type: 'one'}
         for (const {id, type} of deletes){
             if(type == 'all'){
@@ -206,6 +211,7 @@ function Provider({ children }){
                 exceptions.deleted = true;
                 db[id].repeat.exceptions[targetDateStr] = exceptions;
             }
+            await store.put(db[id]);
         }
         for (const {type, ...task} of tasks){
             task.updatedAt = new Date().toISOString();
@@ -216,8 +222,10 @@ function Provider({ children }){
                 const exceptions = db[task.id].repeat.exceptions[targetDateStr] || {}
                 db[task.id].repeat.exceptions[targetDateStr] = {...exceptions, title: task.title, desc: task.desc, participants: task.participants};
             }
+            await store.put(db[task.id]);
         }
-        setDB(db);
+        await tx.done;
+        setDB({ ...db });
     };
 
     const valueToShare = {

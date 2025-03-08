@@ -47,7 +47,6 @@ function Panel ({selectedDate, showUser}){
     };
 
     const handleUserDelete = ({id, name}) =>{
-        console.log(id, name);
         setComponentData({
             active: true,
             props: {
