@@ -17,6 +17,29 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.child {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.hover-shade {
+  opacity: 1;
+} 
+
+.has-text-wrap {
+  white-space: normal !important;
+  word-break: break-word;
+}
+
+.parent:hover .child {
+  opacity: 1; /* Make visible on hover */
+  visibility: visible;
+}
+.parent:hover .hover-shade {
+  opacity: 0.2; /* Make visible on hover */
+}
+
 .has-border-sm {
   border: black 1px solid;
 }

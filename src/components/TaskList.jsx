@@ -124,6 +124,5 @@ function TaskList({close, selectedDate}){
         </Modal>
     );
 }
-
 export default TaskList;
 

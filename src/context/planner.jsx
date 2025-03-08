@@ -2,6 +2,26 @@ import { createContext, useState } from "react";
 
 const PlannerContext = createContext();
 
+function getRandomAvatar(length) {
+    const seed = [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+}
+
+const createNewUser = () => {
+
+    const now = new Date().toISOString()
+    return {
+        "id": null,
+        "name": "",
+        "createdAt": now,
+        "updatedAt": now,
+        "avatar": getRandomAvatar(),
+        "pts": 0,
+        "completed": {}
+    }
+};
+
 const createNewTask = () => {
     const now = new Date().toISOString()
     return {
@@ -86,7 +106,8 @@ function Provider({ children }){
             "createdAt": "2025-02-24T08:00:00.000Z",
             "updatedAt": "2025-02-24T10:30:00.000Z",
             "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=user1",
-            "pts": 210
+            "pts": 210,
+            "completed": {}
         },
         {
             "id": "user2",
@@ -95,6 +116,7 @@ function Provider({ children }){
             "updatedAt": "2025-02-24T10:30:00.000Z",
             "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=user2",
             "pts": 130,
+            "completed": {}
         },
     ]);
 
@@ -156,6 +178,22 @@ function Provider({ children }){
         setDB(db);
     };
     
+    const addUser = ({user}) => {
+        const id = `${userDB.length+1}`;
+        // user[id] = {...user, id};
+        setUserDB(userDB.concat({...user, id}));
+    };
+    const updateUser = ({user}) => {
+        setUserDB(userDB.map((_user) => {
+            return user.id === _user.id ? user : _user;
+        }));
+    };
+
+    const deleteUser = ({user}) => {
+        setUserDB(userDB.filter((_user) =>
+        _user.id !== user.id));
+    };
+    
     const saveTask = ({tasks, deletes, targetDate}) => {
         const targetDateStr = targetDate.toISOString().split("T")[0];
         // {id: payload.id, type: 'one'}
@@ -189,7 +227,11 @@ function Provider({ children }){
         getTaskByDate,
         saveTask,
         getUserById,
-        addTask
+        addTask,
+        createNewUser,
+        addUser,
+        deleteUser,
+        updateUser
     };
     return (
         <PlannerContext.Provider value={valueToShare}>
@@ -198,5 +240,5 @@ function Provider({ children }){
     );
 };
 
-export { Provider, createNewTask };
+export { Provider, createNewTask, createNewUser, getRandomAvatar };
 export default PlannerContext;

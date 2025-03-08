@@ -3,15 +3,26 @@ import Calendar from './components/Calendar.jsx';
 import Panel from './components/Panel.jsx';
 import TaskList from "./components/TaskList";
 import CreateTask from './components/CreateTask.jsx';
+import UserTask from './components/UserTask.jsx';
 
 function App() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [showTask, setShowTask] = useState(false);
     const [showEventAdd, setShowEventAdd] = useState(false);
+    const [showUserTask, setShowUserTask] = useState(false);
+    const [curUserId, setCurUserId] = useState('');
 
     const resetToToday = () => {
       setSelectedDate(new Date());
     }
+    const showUser = (id) =>{
+      setShowUserTask(true);
+      setCurUserId(id);
+    }
+    const closeUser = () =>{
+      setShowUserTask(false);
+      setCurUserId('');
+    };
 
     const createTask = () => {
       setShowEventAdd(true);
@@ -34,12 +45,13 @@ function App() {
                 <Calendar handleDateClick={handleDateClick} selectedDate={selectedDate} resetToToday={resetToToday} createTask={createTask}/>
               </div>
               <div className="column is-3 is-flex is-flex-direction-column is-justify-content-center" style={{minWidth: '330px'}}>
-                <Panel selectedDate={selectedDate}/>
+                <Panel selectedDate={selectedDate} showUser={showUser}/>
               </div>
             </div>
         </div>
         {showTask && <TaskList close={closeTask} selectedDate={selectedDate}/>}
         {showEventAdd && <CreateTask setShowEventAdd={setShowEventAdd}/>}
+        {showUserTask && <UserTask userid={curUserId} close={closeUser} selectedDate={selectedDate}/>}
       </div>
     );
   }
