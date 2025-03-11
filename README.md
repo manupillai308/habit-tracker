@@ -12,7 +12,7 @@ Check out the live version here:
 
 ## 🎥 Video Demo
 
-📹 *Coming soon...*
+[Watch Demo](https://drive.google.com/file/d/1VU8T79a7rTRjpZoDg5j5TSrGF28SWaNZ/view?usp=sharing)
 
 ## Features
 
