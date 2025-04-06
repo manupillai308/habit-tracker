@@ -35,10 +35,16 @@ function App() {
     const closeTask = () => {
         setShowTask(false);
     }
+    const watchDemo = () => {
+      window.open("https://drive.google.com/file/d/1VU8T79a7rTRjpZoDg5j5TSrGF28SWaNZ/view", "_blank");
+    }
 
     return (
       <div className="">
         <p className="has-text-centered p-3 mb-0 is-size-1 title" style={{position: 'static', top: '0', zIndex: '1000'}}>Habit Tracker</p>
+        <div onClick={watchDemo} className='has-text-black is-primary m-2 p-3 button' style={{'position': 'absolute', 'right':0, top:0}}>
+            Watch Demo
+        </div>
         <div className='container'>
             <div className="columns is-justify-content-center	m-0">
               <div className="column mr-3 is-half">

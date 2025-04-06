@@ -85,7 +85,7 @@ function Calendar({handleDateClick, selectedDate, resetToToday, createTask}) {
                             windowWidth >= 1450 ? getTaskByDate(new Date(year, month, date)).slice(0, 2).map((task) => {
 
                                 return (<div key={task.id} className=" has-background-success is-size-7 mb-1">
-                                {task.title}
+                                {task.title?.length > 8 ? task.title.slice(0, 8) + '...': task.title}
                                 </div>);
                             })
                             :
